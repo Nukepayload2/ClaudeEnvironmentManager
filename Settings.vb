@@ -1,8 +1,7 @@
 Imports System.IO
-Imports System.Xml.Linq
 
 Public NotInheritable Class Settings
-    Private Const SettingsFileName As String = "ClaudeEnvironmentManager.settings"
+    Private Const SettingsFileName As String = "ClaudeEnvironmentManager.config"
     Private Const DefaultModels As String = "Pro/moonshotai/Kimi-K2-Instruct,moonshotai/Kimi-K2-Instruct,kimi-latest,kimi-k2-0711-preview"
 
     Public Property AnthropicApiKey As String
@@ -34,7 +33,9 @@ Public NotInheritable Class Settings
 
     Public Shared Function Load() As Settings
         If Not File.Exists(SettingsFileName) Then
-            Dim settings = New Settings()
+            Dim settings = New Settings With {
+                .ModelList = GetDefaultModelList()
+            }
             settings.Save()
             Return settings
         End If
@@ -42,13 +43,13 @@ Public NotInheritable Class Settings
         Try
             Dim xml = XDocument.Load(SettingsFileName)
             Dim settingsElement = xml.Root
-
+            Dim modelList = settingsElement.<ModelList>.Value
             Return New Settings() With {
-                .AnthropicApiKey = If(settingsElement.Element("AnthropicApiKey")?.Value, String.Empty),
-                .AnthropicBaseUrl = If(settingsElement.Element("AnthropicBaseUrl")?.Value, String.Empty),
-                .AnthropicModel = If(settingsElement.Element("AnthropicModel")?.Value, String.Empty),
-                .LastSelectedFolder = If(settingsElement.Element("LastSelectedFolder")?.Value, String.Empty),
-                .ModelList = If(settingsElement.Element("ModelList")?.Value?.Split(","c).ToList(), GetDefaultModelList())
+                .AnthropicApiKey = If(settingsElement.<AnthropicApiKey>.Value, String.Empty),
+                .AnthropicBaseUrl = If(settingsElement.<AnthropicBaseUrl>.Value, String.Empty),
+                .AnthropicModel = If(settingsElement.<AnthropicModel>.Value, String.Empty),
+                .LastSelectedFolder = If(settingsElement.<LastSelectedFolder>.Value, String.Empty),
+                .ModelList = If(modelList <> Nothing, modelList.Split(","c).ToList(), GetDefaultModelList())
             }
         Catch
             Return New Settings()

@@ -135,27 +135,26 @@ ANTHROPIC_MODEL={model}"
             .CreateNoWindow = False
         }
 
-        Select Case False
-            Case OperatingSystem.IsLinux()
-                startInfo.FileName = "gnome-terminal"
-                startInfo.Arguments = "-- bash -c ""claude; exec bash"""
-            Case OperatingSystem.IsMacOS()
-                startInfo.FileName = "open"
-                startInfo.Arguments = "-a Terminal --args -l -c ""claude"""
-            Case OperatingSystem.IsWindows()
-                startInfo.FileName = "cmd"
-                startInfo.Arguments = "/k claude"
-            Case Else
-                Throw New PlatformNotSupportedException("Unsupported operating system.")
-        End Select
+        If OperatingSystem.IsLinux() Then
+            startInfo.FileName = "gnome-terminal"
+            startInfo.Arguments = "-- bash -c ""claude; exec bash"""
+        ElseIf OperatingSystem.IsMacOS() Then
+            startInfo.FileName = "open"
+            startInfo.Arguments = "-a Terminal --args -l -c ""claude"""
+        ElseIf OperatingSystem.IsWindows() Then
+            startInfo.FileName = "cmd"
+            startInfo.Arguments = "/k claude"
+        Else
+            Throw New PlatformNotSupportedException("Unsupported operating system.")
+        End If
 
         ' Set environment variables
-        startInfo.EnvironmentVariables("ANTHROPIC_API_KEY") = ApiKeyTextBox.Text
+        startInfo.EnvironmentVariables!ANTHROPIC_API_KEY = ApiKeyTextBox.Text
         If Not String.IsNullOrWhiteSpace(BaseUrlTextBox.Text) Then
-            startInfo.EnvironmentVariables("ANTHROPIC_BASE_URL") = BaseUrlTextBox.Text
+            startInfo.EnvironmentVariables!ANTHROPIC_BASE_URL = BaseUrlTextBox.Text
         End If
         If Not String.IsNullOrWhiteSpace(ModelTextBox.Text) Then
-            startInfo.EnvironmentVariables("ANTHROPIC_MODEL") = ModelTextBox.Text
+            startInfo.EnvironmentVariables!ANTHROPIC_MODEL = ModelTextBox.Text
         End If
 
         Process.Start(startInfo)

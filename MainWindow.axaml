@@ -91,10 +91,8 @@
                 Content="Launch Claude" 
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Width="150"
-                Height="40"
-                Grid.Row="6"
-                FontSize="16"
+                Grid.Row="6" Padding="32,16"
+                FontSize="20"
                 FontWeight="Bold"/>
     </Grid>
 </Window>
