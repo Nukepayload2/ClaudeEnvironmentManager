@@ -127,11 +127,24 @@ ANTHROPIC_MODEL={model}"
 
     Private Sub LaunchClaude()
         Dim startInfo = New ProcessStartInfo() With {
-            .FileName = "cmd", .Arguments = "/k claude",
             .WorkingDirectory = FolderPathTextBox.Text,
             .UseShellExecute = False,
             .CreateNoWindow = False
         }
+
+        Select Case False
+            Case OperatingSystem.IsLinux()
+                startInfo.FileName = "gnome-terminal"
+                startInfo.Arguments = "-- bash -c ""claude; exec bash"""
+            Case OperatingSystem.IsMacOS()
+                startInfo.FileName = "open"
+                startInfo.Arguments = "-a Terminal --args -l -c ""claude"""
+            Case OperatingSystem.IsWindows()
+                startInfo.FileName = "cmd"
+                startInfo.Arguments = "/k claude"
+            Case Else
+                Throw New PlatformNotSupportedException("Unsupported operating system.")
+        End Select
 
         ' Set environment variables
         startInfo.EnvironmentVariables("ANTHROPIC_API_KEY") = ApiKeyTextBox.Text
