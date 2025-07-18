@@ -32,16 +32,6 @@ Partial Class MainWindow
         ModelTextBox.Text = _settings.AnthropicModel
         FolderPathTextBox.Text = _settings.LastSelectedFolder
 
-        ' Attach event handlers
-        AddHandler BrowseFolderButton.Click, AddressOf BrowseFolderButton_Click
-        AddHandler LaunchButton.Click, AddressOf LaunchButton_Click
-
-        ' Update preview when values change
-        AddHandler ApiKeyTextBox.TextChanged, AddressOf UpdateEnvironmentPreview
-        AddHandler BaseUrlTextBox.TextChanged, AddressOf UpdateEnvironmentPreview
-        AddHandler ModelTextBox.TextChanged, AddressOf UpdateEnvironmentPreview
-        AddHandler FolderPathTextBox.TextChanged, AddressOf UpdateEnvironmentPreview
-
         ' Initial preview update
         UpdateEnvironmentPreview(Nothing, Nothing)
     End Sub
@@ -78,11 +68,11 @@ Partial Class MainWindow
         Next
     End Sub
 
-    Private Async Sub BrowseFolderButton_Click(sender As Object, e As RoutedEventArgs)
+    Private Async Sub BrowseFolderButton_Click(sender As Object, e As RoutedEventArgs) Handles BrowseFolderButton.Click
         Dim dialog = New FolderPickerOpenOptions With {.Title = "Select Working Folder"}
 
         If Not String.IsNullOrEmpty(FolderPathTextBox.Text) Then
-            dialog.SuggestedStartLocation = StorageProvider.TryGetFolderFromPathAsync(FolderPathTextBox.Text)
+            dialog.SuggestedStartLocation = Await StorageProvider.TryGetFolderFromPathAsync(FolderPathTextBox.Text)
         End If
 
         Dim results = Await StorageProvider.OpenFolderPickerAsync(
@@ -94,19 +84,17 @@ Partial Class MainWindow
         End If
     End Sub
 
-    Private Sub UpdateEnvironmentPreview(sender As Object, e As EventArgs)
-        Dim apiKey = If(ApiKeyTextBox.Text, String.Empty)
+    Private Sub UpdateEnvironmentPreview(sender As Object, e As EventArgs) Handles ApiKeyTextBox.TextChanged, BaseUrlTextBox.TextChanged, ModelTextBox.TextChanged, FolderPathTextBox.TextChanged
+        Dim apiKey = New String("·"c, If(ApiKeyTextBox.Text, String.Empty).Length)
         Dim baseUrl = If(BaseUrlTextBox.Text, String.Empty)
         Dim model = If(ModelTextBox.Text, String.Empty)
-        Dim folder = If(FolderPathTextBox.Text, String.Empty)
 
         EnvironmentPreviewTextBox.Text = $"ANTHROPIC_API_KEY={apiKey}
 ANTHROPIC_BASE_URL={baseUrl}
-ANTHROPIC_MODEL={model}
-WORKING_FOLDER={folder}"
+ANTHROPIC_MODEL={model}"
     End Sub
 
-    Private Sub LaunchButton_Click(sender As Object, e As RoutedEventArgs)
+    Private Sub LaunchButton_Click(sender As Object, e As RoutedEventArgs) Handles LaunchButton.Click
         ' Save settings
         _settings.AnthropicApiKey = ApiKeyTextBox.Text
         _settings.AnthropicBaseUrl = BaseUrlTextBox.Text
@@ -139,9 +127,9 @@ WORKING_FOLDER={folder}"
 
     Private Sub LaunchClaude()
         Dim startInfo = New ProcessStartInfo() With {
-            .FileName = "claude",
+            .FileName = "cmd", .Arguments = "/k claude",
             .WorkingDirectory = FolderPathTextBox.Text,
-            .UseShellExecute = True,
+            .UseShellExecute = False,
             .CreateNoWindow = False
         }
 
@@ -189,20 +177,15 @@ WORKING_FOLDER={folder}"
     End Sub
 
     ' Event handlers for ComboBox and TextBox synchronization
-    Private Sub ApiKeyComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
-        ApiKeyTextBox.Text = If(ApiKeyComboBox.SelectedItem IsNot Nothing, ApiKeyComboBox.SelectedItem.ToString(), String.Empty)
+    Private Sub ApiKeyComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles ApiKeyComboBox.SelectionChanged
+        ApiKeyTextBox.Text = If(ApiKeyComboBox.SelectedItem IsNot Nothing, DirectCast(ApiKeyComboBox.SelectedItem, ComboBoxItem).Tag.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
-    Private Sub ApiKeyComboBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        ApiKeyTextBox.Text = If(ApiKeyComboBox.SelectedItem IsNot Nothing, ApiKeyComboBox.SelectedItem.ToString(), String.Empty)
-        UpdateEnvironmentPreview(sender, e)
-    End Sub
-
-    Private Sub ApiKeyTextBox_TextChanged(sender As Object, e As TextChangedEventArgs)
+    Private Sub ApiKeyTextBox_TextChanged(sender As Object, e As TextChangedEventArgs) Handles ApiKeyTextBox.TextChanged
         Dim text = ApiKeyTextBox.Text
-        For Each it In ApiKeyComboBox.Items
-            If it.ToString() = text Then
+        For Each it As ComboBoxItem In ApiKeyComboBox.Items
+            If it.Tag.ToString() = text Then
                 ApiKeyComboBox.SelectedItem = it
                 Exit For
             End If
@@ -210,20 +193,15 @@ WORKING_FOLDER={folder}"
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
-    Private Sub BaseUrlComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
-        BaseUrlTextBox.Text = If(BaseUrlComboBox.SelectedItem IsNot Nothing, BaseUrlComboBox.SelectedItem.ToString(), String.Empty)
+    Private Sub BaseUrlComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles BaseUrlComboBox.SelectionChanged
+        BaseUrlTextBox.Text = If(BaseUrlComboBox.SelectedItem IsNot Nothing, DirectCast(BaseUrlComboBox.SelectedItem, ComboBoxItem).Tag.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
-    Private Sub BaseUrlComboBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        BaseUrlTextBox.Text = If(BaseUrlComboBox.SelectedItem IsNot Nothing, BaseUrlComboBox.SelectedItem.ToString(), String.Empty)
-        UpdateEnvironmentPreview(sender, e)
-    End Sub
-
-    Private Sub BaseUrlTextBox_TextChanged(sender As Object, e As TextChangedEventArgs)
+    Private Sub BaseUrlTextBox_TextChanged(sender As Object, e As TextChangedEventArgs) Handles BaseUrlTextBox.TextChanged
         Dim text = BaseUrlTextBox.Text
-        For Each it In BaseUrlComboBox.Items
-            If it.ToString() = text Then
+        For Each it As ComboBoxItem In BaseUrlComboBox.Items
+            If it.Tag.ToString() = text Then
                 BaseUrlComboBox.SelectedItem = it
                 Exit For
             End If
@@ -231,17 +209,12 @@ WORKING_FOLDER={folder}"
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
-    Private Sub ModelComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
+    Private Sub ModelComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles ModelComboBox.SelectionChanged
         ModelTextBox.Text = If(ModelComboBox.SelectedItem IsNot Nothing, ModelComboBox.SelectedItem.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
-    Private Sub ModelComboBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        ModelTextBox.Text = If(ModelComboBox.SelectedItem IsNot Nothing, ModelComboBox.SelectedItem.ToString(), String.Empty)
-        UpdateEnvironmentPreview(sender, e)
-    End Sub
-
-    Private Sub ModelTextBox_TextChanged(sender As Object, e As TextChangedEventArgs)
+    Private Sub ModelTextBox_TextChanged(sender As Object, e As TextChangedEventArgs) Handles ModelTextBox.TextChanged
         Dim text = ModelTextBox.Text
         For Each it In ModelComboBox.Items
             If it.ToString() = text Then

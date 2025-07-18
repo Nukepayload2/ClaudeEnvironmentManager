@@ -28,7 +28,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <ComboBox x:Name="ApiKeyComboBox" Margin="0,0,5,5"/>
-                    <TextBox x:Name="ApiKeyTextBox" Margin="0,0,5,0"/>
+                    <TextBox x:Name="ApiKeyTextBox" PasswordChar="·" Margin="0,0,5,0"/>
                 </StackPanel>
             </Grid>
         </StackPanel>

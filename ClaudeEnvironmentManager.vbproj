@@ -6,6 +6,8 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <RootNamespace>ClaudeEnvironmentManager</RootNamespace>
+    <OptionStrict>On</OptionStrict>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
 
