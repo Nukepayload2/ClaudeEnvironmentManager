@@ -124,7 +124,7 @@ ANTHROPIC_MODEL={model}"
         _settings.AnthropicBaseUrl = BaseUrlTextBox.Text
         _settings.AnthropicModel = ModelTextBox.Text
         _settings.LastSelectedFolder = FolderPathTextBox.Text
-        _settings.ModelList = ModelComboBox.Items.OfType(Of String).Append(ModelTextBox.Text).Where(Function(it) it <> Nothing).Distinct().ToList()
+        _settings.ModelList = ModelComboBox.Items.OfType(Of String).Append(ModelTextBox.Text?.Trim).Where(Function(it) it <> Nothing).Distinct().ToList()
         _settings.Save()
     End Sub
 
