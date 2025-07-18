@@ -4,6 +4,7 @@ Imports Avalonia.Media
 Imports System.IO
 Imports System.Runtime.InteropServices
 Imports Avalonia
+Imports Avalonia.Platform.Storage
 
 Partial Class MainWindow
     Inherits Window
@@ -34,8 +35,6 @@ Partial Class MainWindow
         ' Attach event handlers
         AddHandler BrowseFolderButton.Click, AddressOf BrowseFolderButton_Click
         AddHandler LaunchButton.Click, AddressOf LaunchButton_Click
-        AddHandler BrowseApiKeyButton.Click, AddressOf BrowseApiKeyButton_Click
-        AddHandler BrowseBaseUrlButton.Click, AddressOf BrowseBaseUrlButton_Click
 
         ' Update preview when values change
         AddHandler ApiKeyTextBox.TextChanged, AddressOf UpdateEnvironmentPreview
@@ -53,12 +52,14 @@ Partial Class MainWindow
             Cast(Of DictionaryEntry)().
             Where(Function(kv) kv.Key.ToString().EndsWith("_API_KEY", StringComparison.OrdinalIgnoreCase) AndAlso
                   Not kv.Key.ToString().Equals("ANTHROPIC_API_KEY", StringComparison.OrdinalIgnoreCase)).
-            Select(Function(kv) kv.Value.ToString()).
-            Distinct().
             ToList()
 
-        For Each key In apiKeys
-            ApiKeyComboBox.Items.Add(key)
+        For Each kv In apiKeys
+            Dim item = New ComboBoxItem() With {
+                .Content = kv.Key.ToString(),
+                .Tag = kv.Value.ToString()
+            }
+            ApiKeyComboBox.Items.Add(item)
         Next
 
         ' Load Base URLs
@@ -66,25 +67,27 @@ Partial Class MainWindow
             Cast(Of DictionaryEntry)().
             Where(Function(kv) kv.Key.ToString().EndsWith("_BASE_URL", StringComparison.OrdinalIgnoreCase) AndAlso
                   Not kv.Key.ToString().Equals("ANTHROPIC_BASE_URL", StringComparison.OrdinalIgnoreCase)).
-            Select(Function(kv) kv.Value.ToString()).
-            Distinct().
             ToList()
 
-        For Each url In baseUrls
-            BaseUrlComboBox.Items.Add(url)
+        For Each kv In baseUrls
+            Dim item = New ComboBoxItem() With {
+                .Content = kv.Key.ToString(),
+                .Tag = kv.Value.ToString()
+            }
+            BaseUrlComboBox.Items.Add(item)
         Next
     End Sub
 
-    Private Sub BrowseFolderButton_Click(sender As Object, e As RoutedEventArgs)
-        Dim dialog = New OpenFolderDialog() With {
-            .Title = "Select Working Folder"
-        }
+    Private Async Sub BrowseFolderButton_Click(sender As Object, e As RoutedEventArgs)
+        Dim dialog = New FolderPickerOpenOptions With {.Title = "Select Working Folder"}
 
         If Not String.IsNullOrEmpty(FolderPathTextBox.Text) Then
-            dialog.Directory = FolderPathTextBox.Text
+            dialog.SuggestedStartLocation = StorageProvider.TryGetFolderFromPathAsync(FolderPathTextBox.Text)
         End If
 
-        Dim result = dialog.ShowAsync(Me).Result
+        Dim results = Await StorageProvider.OpenFolderPickerAsync(
+            New FolderPickerOpenOptions With {.Title = "Select Working Folder"})
+        Dim result = results.FirstOrDefault?.TryGetLocalPath()
         If Not String.IsNullOrEmpty(result) Then
             FolderPathTextBox.Text = result
             _settings.LastSelectedFolder = result
@@ -136,9 +139,9 @@ WORKING_FOLDER={folder}"
 
     Private Sub LaunchClaude()
         Dim startInfo = New ProcessStartInfo() With {
-            .FileName = GetClaudeExecutable(),
+            .FileName = "claude",
             .WorkingDirectory = FolderPathTextBox.Text,
-            .UseShellExecute = False,
+            .UseShellExecute = True,
             .CreateNoWindow = False
         }
 
@@ -153,47 +156,6 @@ WORKING_FOLDER={folder}"
 
         Process.Start(startInfo)
     End Sub
-
-    Private Function GetClaudeExecutable() As String
-        ' Try to find claude executable
-        Dim claudeCmd = "claude"
-
-        ' On Windows, check if claude.cmd exists
-        If RuntimeInformation.IsOSPlatform(OSPlatform.Windows) Then
-            Dim fullPath = Environment.ExpandEnvironmentVariables("%PATH%")
-            Dim paths = fullPath.Split(";"c)
-
-            For Each p In paths
-                Dim claudePath = Path.Combine(p.Trim(), "claude.cmd")
-                If File.Exists(claudePath) Then
-                    Return claudePath
-                End If
-
-                claudePath = Path.Combine(p.Trim(), "claude.exe")
-                If File.Exists(claudePath) Then
-                    Return claudePath
-                End If
-            Next
-        Else
-            ' On Linux/macOS, use which command to find claude
-            Dim startInfo = New ProcessStartInfo() With {
-                .FileName = "which",
-                .Arguments = "claude",
-                .RedirectStandardOutput = True,
-                .UseShellExecute = False
-            }
-
-            Dim proc = Process.Start(startInfo)
-            Dim output = proc.StandardOutput.ReadToEnd().Trim()
-            proc.WaitForExit()
-
-            If Not String.IsNullOrEmpty(output) AndAlso File.Exists(output) Then
-                Return output
-            End If
-        End If
-
-        Return claudeCmd
-    End Function
 
     Private Sub ShowError(message As String)
         Dim dialog = New Window() With {
@@ -290,47 +252,4 @@ WORKING_FOLDER={folder}"
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
-    Private Sub BrowseApiKeyButton_Click(sender As Object, e As RoutedEventArgs)
-        ' Browse for API key file
-        Dim dialog = New OpenFileDialog() With {
-            .Title = "Select API Key File",
-            .Filters = New List(Of FileDialogFilter) From {
-                New FileDialogFilter() With {.Name = "Text Files", .Extensions = New List(Of String) From {"txt"}},
-                New FileDialogFilter() With {.Name = "All Files", .Extensions = New List(Of String) From {"*"}}
-            },
-            .AllowMultiple = False
-        }
-
-        Dim result = dialog.ShowAsync(Me).Result
-        If result IsNot Nothing AndAlso result.Length > 0 Then
-            Try
-                Dim apiKey = File.ReadAllText(result(0)).Trim()
-                ApiKeyTextBox.Text = apiKey
-            Catch ex As Exception
-                ShowError($"Failed to read API key file: {ex.Message}")
-            End Try
-        End If
-    End Sub
-
-    Private Sub BrowseBaseUrlButton_Click(sender As Object, e As RoutedEventArgs)
-        ' Browse for base URL configuration file
-        Dim dialog = New OpenFileDialog() With {
-            .Title = "Select Base URL Configuration File",
-            .Filters = New List(Of FileDialogFilter) From {
-                New FileDialogFilter() With {.Name = "Text Files", .Extensions = New List(Of String) From {"txt"}},
-                New FileDialogFilter() With {.Name = "All Files", .Extensions = New List(Of String) From {"*"}}
-            },
-            .AllowMultiple = False
-        }
-
-        Dim result = dialog.ShowAsync(Me).Result
-        If result IsNot Nothing AndAlso result.Length > 0 Then
-            Try
-                Dim baseUrl = File.ReadAllText(result(0)).Trim()
-                BaseUrlTextBox.Text = baseUrl
-            Catch ex As Exception
-                ShowError($"Failed to read base URL file: {ex.Message}")
-            End Try
-        End If
-    End Sub
 End Class
