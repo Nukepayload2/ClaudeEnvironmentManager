@@ -1,12 +1,8 @@
 ﻿Imports Avalonia.Controls
 Imports Avalonia.Interactivity
 Imports Avalonia.Media
-Imports Avalonia.Layout
-Imports System.Diagnostics
 Imports System.IO
 Imports System.Runtime.InteropServices
-Imports System.Collections.Generic
-Imports System.Linq
 Imports Avalonia
 
 Partial Class MainWindow
@@ -54,7 +50,7 @@ Partial Class MainWindow
     Private Sub LoadEnvironmentVariables()
         ' Load API Keys
         Dim apiKeys = Environment.GetEnvironmentVariables().
-            Cast(Of Collections.DictionaryEntry)().
+            Cast(Of DictionaryEntry)().
             Where(Function(kv) kv.Key.ToString().EndsWith("_API_KEY", StringComparison.OrdinalIgnoreCase) AndAlso
                   Not kv.Key.ToString().Equals("ANTHROPIC_API_KEY", StringComparison.OrdinalIgnoreCase)).
             Select(Function(kv) kv.Value.ToString()).
@@ -67,7 +63,7 @@ Partial Class MainWindow
 
         ' Load Base URLs
         Dim baseUrls = Environment.GetEnvironmentVariables().
-            Cast(Of Collections.DictionaryEntry)().
+            Cast(Of DictionaryEntry)().
             Where(Function(kv) kv.Key.ToString().EndsWith("_BASE_URL", StringComparison.OrdinalIgnoreCase) AndAlso
                   Not kv.Key.ToString().Equals("ANTHROPIC_BASE_URL", StringComparison.OrdinalIgnoreCase)).
             Select(Function(kv) kv.Value.ToString()).
@@ -203,72 +199,94 @@ WORKING_FOLDER={folder}"
         Dim dialog = New Window() With {
             .Title = "Error",
             .Width = 400,
-            .Height = 200,
-            .Content = New StackPanel() With {
-                .Margin = New Thickness(20),
-                .Children = {
-                    New TextBlock() With {
-                        .Text = message,
-                        .TextWrapping = TextWrapping.Wrap
-                    },
-                    New Button() With {
-                        .Content = "OK",
-                        .HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                        .Margin = New Thickness(0, 20, 0, 0)
-                    }
-                }
-            }
+            .Height = 200
         }
 
-        Dim okButton = CType(CType(dialog.Content, StackPanel).Children(1), Button)
+        Dim stackPanel = New StackPanel() With {
+            .Margin = New Thickness(20)
+        }
+
+        Dim textBlock = New TextBlock() With {
+            .Text = message,
+            .TextWrapping = TextWrapping.Wrap
+        }
+
+        Dim okButton = New Button() With {
+            .Content = "OK",
+            .HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            .Margin = New Thickness(0, 20, 0, 0)
+        }
+
         AddHandler okButton.Click, Sub(s, e) dialog.Close()
 
+        stackPanel.Children.Add(textBlock)
+        stackPanel.Children.Add(okButton)
+
+        dialog.Content = stackPanel
         dialog.ShowDialog(Me)
     End Sub
 
     ' Event handlers for ComboBox and TextBox synchronization
     Private Sub ApiKeyComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
-        ApiKeyTextBox.Text = ApiKeyComboBox.Text
+        ApiKeyTextBox.Text = If(ApiKeyComboBox.SelectedItem IsNot Nothing, ApiKeyComboBox.SelectedItem.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
     Private Sub ApiKeyComboBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        ApiKeyTextBox.Text = ApiKeyComboBox.Text
+        ApiKeyTextBox.Text = If(ApiKeyComboBox.SelectedItem IsNot Nothing, ApiKeyComboBox.SelectedItem.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
     Private Sub ApiKeyTextBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        ApiKeyComboBox.Text = ApiKeyTextBox.Text
+        Dim text = ApiKeyTextBox.Text
+        For Each it In ApiKeyComboBox.Items
+            If it.ToString() = text Then
+                ApiKeyComboBox.SelectedItem = it
+                Exit For
+            End If
+        Next
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
     Private Sub BaseUrlComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
-        BaseUrlTextBox.Text = BaseUrlComboBox.Text
+        BaseUrlTextBox.Text = If(BaseUrlComboBox.SelectedItem IsNot Nothing, BaseUrlComboBox.SelectedItem.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
     Private Sub BaseUrlComboBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        BaseUrlTextBox.Text = BaseUrlComboBox.Text
+        BaseUrlTextBox.Text = If(BaseUrlComboBox.SelectedItem IsNot Nothing, BaseUrlComboBox.SelectedItem.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
     Private Sub BaseUrlTextBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        BaseUrlComboBox.Text = BaseUrlTextBox.Text
+        Dim text = BaseUrlTextBox.Text
+        For Each it In BaseUrlComboBox.Items
+            If it.ToString() = text Then
+                BaseUrlComboBox.SelectedItem = it
+                Exit For
+            End If
+        Next
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
     Private Sub ModelComboBox_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
-        ModelTextBox.Text = ModelComboBox.Text
+        ModelTextBox.Text = If(ModelComboBox.SelectedItem IsNot Nothing, ModelComboBox.SelectedItem.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
     Private Sub ModelComboBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        ModelTextBox.Text = ModelComboBox.Text
+        ModelTextBox.Text = If(ModelComboBox.SelectedItem IsNot Nothing, ModelComboBox.SelectedItem.ToString(), String.Empty)
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
     Private Sub ModelTextBox_TextChanged(sender As Object, e As TextChangedEventArgs)
-        ModelComboBox.Text = ModelTextBox.Text
+        Dim text = ModelTextBox.Text
+        For Each it In ModelComboBox.Items
+            If it.ToString() = text Then
+                ModelComboBox.SelectedItem = it
+                Exit For
+            End If
+        Next
         UpdateEnvironmentPreview(sender, e)
     End Sub
 
@@ -287,7 +305,6 @@ WORKING_FOLDER={folder}"
         If result IsNot Nothing AndAlso result.Length > 0 Then
             Try
                 Dim apiKey = File.ReadAllText(result(0)).Trim()
-                ApiKeyComboBox.Text = apiKey
                 ApiKeyTextBox.Text = apiKey
             Catch ex As Exception
                 ShowError($"Failed to read API key file: {ex.Message}")
@@ -310,7 +327,6 @@ WORKING_FOLDER={folder}"
         If result IsNot Nothing AndAlso result.Length > 0 Then
             Try
                 Dim baseUrl = File.ReadAllText(result(0)).Trim()
-                BaseUrlComboBox.Text = baseUrl
                 BaseUrlTextBox.Text = baseUrl
             Catch ex As Exception
                 ShowError($"Failed to read base URL file: {ex.Message}")
