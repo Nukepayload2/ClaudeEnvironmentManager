@@ -16,19 +16,18 @@ The Claude Environment Manager is a graphical user interface (GUI) application f
    - Environment variables with names ending in `_API_KEY` (excluding `ANTHROPIC_API_KEY`) will be loaded into the API Key combo box
 2. **Base URL Configuration**: Set custom base URLs for API endpoints
    - Environment variables with names ending in `_BASE_URL` (excluding `ANTHROPIC_BASE_URL`) will be loaded into the Base URL combo box
-3. **Model Selection**: Choose models for your operations
+3. **Model Selection**: Choose or input models for your operations
 4. **Folder Selection**: Select working directories using the browse button
 5. **Environment Preview**: View environment variables before launching
 6. **Launch**: Start the Claude environment with your configurations
 
 ## Runtime Environment
 - Requires .NET 8.0 or later
-- Built with Avalonia UI framework
 - Windows, Linux, and macOS support
 
 ## Getting Started
 1. Clone the repository
-2. Build the solution with Visual Studio or .NET CLI
+2. Build the solution with Visual Studio or .NET CLI (`dotnet build`)
 3. Run the application and configure your settings
 4. Launch a Claude environment
 
