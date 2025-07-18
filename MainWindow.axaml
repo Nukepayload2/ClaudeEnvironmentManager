@@ -2,8 +2,109 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="600"
         x:Class="ClaudeEnvironmentManager.MainWindow"
-        Title="ClaudeEnvironmentManager">
-    Welcome to Avalonia!
+        Title="Claude Environment Manager"
+        MinWidth="500" MinHeight="400">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- API Key Section -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="API Key" FontWeight="Bold" Margin="0,0,0,5"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <ComboBox x:Name="ApiKeyComboBox" Margin="0,0,5,5"/>
+                    <TextBox x:Name="ApiKeyTextBox" Margin="0,0,5,0"/>
+                </StackPanel>
+                <Button x:Name="BrowseApiKeyButton" 
+                        Content="..." 
+                        Width="30" 
+                        Grid.Column="1"
+                        VerticalAlignment="Top"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Base URL Section -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+            <TextBlock Text="Base URL" FontWeight="Bold" Margin="0,0,0,5"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <ComboBox x:Name="BaseUrlComboBox" Margin="0,0,5,5"/>
+                    <TextBox x:Name="BaseUrlTextBox" Margin="0,0,5,0"/>
+                </StackPanel>
+                <Button x:Name="BrowseBaseUrlButton" 
+                        Content="..." 
+                        Width="30" 
+                        Grid.Column="1"
+                        VerticalAlignment="Top"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Model Section -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+            <TextBlock Text="Model" FontWeight="Bold" Margin="0,0,0,5"/>
+            <StackPanel>
+                <ComboBox x:Name="ModelComboBox" Margin="0,0,0,5"/>
+                <TextBox x:Name="ModelTextBox"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Folder Selection Section -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,15">
+            <TextBlock Text="Working Folder" FontWeight="Bold" Margin="0,0,0,5"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="FolderPathTextBox" 
+                         IsReadOnly="True"
+                         Grid.Column="0"/>
+                <Button x:Name="BrowseFolderButton" 
+                        Content="Browse..." 
+                        Width="80" 
+                        Margin="5,0,0,0"
+                        Grid.Column="1"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Environment Variables Display -->
+        <StackPanel Grid.Row="4" Margin="0,0,0,15">
+            <TextBlock Text="Environment Variables Preview" FontWeight="Bold" Margin="0,0,0,5"/>
+            <TextBox x:Name="EnvironmentPreviewTextBox" 
+                     IsReadOnly="True"
+                     AcceptsReturn="True"
+                     Height="100"
+                     FontFamily="Consolas,Courier New"/>
+        </StackPanel>
+
+        <!-- Launch Button -->
+        <Button x:Name="LaunchButton" 
+                Content="Launch Claude" 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="150"
+                Height="40"
+                Grid.Row="6"
+                FontSize="16"
+                FontWeight="Bold"/>
+    </Grid>
 </Window>
