@@ -2,7 +2,6 @@
 Imports Avalonia.Interactivity
 Imports Avalonia.Media
 Imports System.IO
-Imports System.Runtime.InteropServices
 Imports Avalonia
 Imports Avalonia.Platform.Storage
 
@@ -10,7 +9,6 @@ Partial Class MainWindow
     Inherits Window
 
     Private ReadOnly _settings As Settings
-    Private Const DefaultModels As String = "Pro/moonshotai/Kimi-K2-Instruct,moonshotai/Kimi-K2-Instruct,kimi-latest,kimi-k2-0711-preview"
 
     Public Sub New()
         InitializeComponent()
@@ -21,7 +19,7 @@ Partial Class MainWindow
 
     Private Sub InitializeControls()
         ' Setup Model ComboBox with predefined models
-        Dim models = DefaultModels.Split(","c)
+        Dim models = _settings.ModelList
         For Each model In models
             ModelComboBox.Items.Add(model.Trim())
         Next
@@ -96,11 +94,7 @@ ANTHROPIC_MODEL={model}"
 
     Private Sub LaunchButton_Click(sender As Object, e As RoutedEventArgs) Handles LaunchButton.Click
         ' Save settings
-        _settings.AnthropicApiKey = ApiKeyTextBox.Text
-        _settings.AnthropicBaseUrl = BaseUrlTextBox.Text
-        _settings.AnthropicModel = ModelTextBox.Text
-        _settings.LastSelectedFolder = FolderPathTextBox.Text
-        _settings.Save()
+        SaveSettings()
 
         ' Validate inputs
         If String.IsNullOrWhiteSpace(FolderPathTextBox.Text) Then
@@ -123,6 +117,15 @@ ANTHROPIC_MODEL={model}"
         Catch ex As Exception
             ShowError($"Failed to launch Claude: {ex.Message}")
         End Try
+    End Sub
+
+    Private Sub SaveSettings() Handles Me.Closing
+        _settings.AnthropicApiKey = ApiKeyTextBox.Text
+        _settings.AnthropicBaseUrl = BaseUrlTextBox.Text
+        _settings.AnthropicModel = ModelTextBox.Text
+        _settings.LastSelectedFolder = FolderPathTextBox.Text
+        _settings.ModelList = ModelComboBox.Items.OfType(Of String).Append(ModelTextBox.Text).Where(Function(it) it <> Nothing).Distinct().ToList()
+        _settings.Save()
     End Sub
 
     Private Sub LaunchClaude()

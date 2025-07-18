@@ -3,11 +3,13 @@ Imports System.Xml.Linq
 
 Public NotInheritable Class Settings
     Private Const SettingsFileName As String = "ClaudeEnvironmentManager.settings"
+    Private Const DefaultModels As String = "Pro/moonshotai/Kimi-K2-Instruct,moonshotai/Kimi-K2-Instruct,kimi-latest,kimi-k2-0711-preview"
 
     Public Property AnthropicApiKey As String
     Public Property AnthropicBaseUrl As String
     Public Property AnthropicModel As String
     Public Property LastSelectedFolder As String
+    Public Property ModelList As New List(Of String)
 
     Public Sub New()
         ' Initialize with empty strings
@@ -18,12 +20,13 @@ Public NotInheritable Class Settings
     End Sub
 
     Public Sub Save()
-        Dim settingsXml = 
+        Dim settingsXml =
             <Settings>
                 <AnthropicApiKey><%= AnthropicApiKey %></AnthropicApiKey>
                 <AnthropicBaseUrl><%= AnthropicBaseUrl %></AnthropicBaseUrl>
                 <AnthropicModel><%= AnthropicModel %></AnthropicModel>
                 <LastSelectedFolder><%= LastSelectedFolder %></LastSelectedFolder>
+                <ModelList><%= String.Join(",", ModelList) %></ModelList>
             </Settings>
 
         File.WriteAllText(SettingsFileName, settingsXml.ToString())
@@ -31,7 +34,9 @@ Public NotInheritable Class Settings
 
     Public Shared Function Load() As Settings
         If Not File.Exists(SettingsFileName) Then
-            Return New Settings()
+            Dim settings = New Settings()
+            settings.Save()
+            Return settings
         End If
 
         Try
@@ -42,10 +47,15 @@ Public NotInheritable Class Settings
                 .AnthropicApiKey = If(settingsElement.Element("AnthropicApiKey")?.Value, String.Empty),
                 .AnthropicBaseUrl = If(settingsElement.Element("AnthropicBaseUrl")?.Value, String.Empty),
                 .AnthropicModel = If(settingsElement.Element("AnthropicModel")?.Value, String.Empty),
-                .LastSelectedFolder = If(settingsElement.Element("LastSelectedFolder")?.Value, String.Empty)
+                .LastSelectedFolder = If(settingsElement.Element("LastSelectedFolder")?.Value, String.Empty),
+                .ModelList = If(settingsElement.Element("ModelList")?.Value?.Split(","c).ToList(), GetDefaultModelList())
             }
         Catch
             Return New Settings()
         End Try
+    End Function
+
+    Private Shared Function GetDefaultModelList() As List(Of String)
+        Return DefaultModels.Split(","c).ToList()
     End Function
 End Class
