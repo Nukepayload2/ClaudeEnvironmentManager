@@ -1,8 +1,9 @@
-﻿Imports Avalonia.Controls
+﻿Imports System.IO
+Imports Avalonia
+Imports Avalonia.Controls
+Imports Avalonia.Controls.Primitives
 Imports Avalonia.Interactivity
 Imports Avalonia.Media
-Imports System.IO
-Imports Avalonia
 Imports Avalonia.Platform.Storage
 
 Partial Class MainWindow
@@ -93,9 +94,40 @@ ANTHROPIC_MODEL={model}
 DISABLE_TELEMETRY=1"
     End Sub
 
+    Private Function CheckOnboardingStatus() As Boolean
+        Dim onboardingFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+   ".claude.json")
+        If Not File.Exists(onboardingFile) Then Return False
+
+        Dim jsonContent = File.ReadAllText(onboardingFile)
+        Dim onboardingIndex = jsonContent.IndexOf("""hasCompletedOnboarding""", StringComparison.Ordinal)
+        If onboardingIndex < 0 Then Return False
+
+        ' Find the colon after the property name
+        Dim colonIndex = jsonContent.IndexOf(":"c, onboardingIndex)
+        If colonIndex < 0 Then Return False
+
+        ' Skip whitespace after colon
+        Dim valueStart = colonIndex + 1
+        While valueStart < jsonContent.Length AndAlso Char.IsWhiteSpace(jsonContent(valueStart))
+            valueStart += 1
+        End While
+
+        ' Check if the next non-whitespace is "true"
+        Return valueStart + 3 <= jsonContent.Length AndAlso
+                 jsonContent.AsSpan(valueStart, 4).SequenceEqual("true")
+    End Function
+
     Private Sub LaunchButton_Click(sender As Object, e As RoutedEventArgs) Handles LaunchButton.Click
         ' Save settings
         SaveSettings()
+
+        ' Check onboarding status
+
+        If Not CheckOnboardingStatus() Then
+            ShowError("Error: Onboarding not completed. Please complete onboarding before changing the base URI.")
+            Return
+        End If
 
         ' Validate inputs
         If String.IsNullOrWhiteSpace(FolderPathTextBox.Text) Then
@@ -162,33 +194,51 @@ DISABLE_TELEMETRY=1"
     End Sub
 
     Private Sub ShowError(message As String)
-        Dim dialog = New Window() With {
+        Dim dialog = New Window With {
             .Title = "Error",
             .Width = 400,
-            .Height = 200
+            .Height = 300,
+            .WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            .MinHeight = 100,
+            .MinWidth = 200
         }
 
-        Dim stackPanel = New StackPanel() With {
-            .Margin = New Thickness(20)
+        Dim grid = New Grid With {
+            .Margin = New Thickness(16)
         }
 
-        Dim textBlock = New TextBlock() With {
+        grid.RowDefinitions.Add(New RowDefinition With {.Height = New GridLength(1, GridUnitType.Star)})
+        grid.RowDefinitions.Add(New RowDefinition With {.Height = GridLength.Auto})
+
+        Dim textBlock = New TextBlock With {
             .Text = message,
-            .TextWrapping = TextWrapping.Wrap
+            .TextWrapping = TextWrapping.Wrap,
+            .VerticalAlignment = VerticalAlignment.Top,
+            .Margin = New Thickness(0, 0, 0, 10)
         }
 
-        Dim okButton = New Button() With {
+        Dim scrollViewer = New ScrollViewer With {
+            .Content = textBlock,
+            .VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            .HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            .Padding = New Thickness(0)
+        }
+
+        Grid.SetRow(scrollViewer, 0)
+
+        Dim okButton = New Button With {
             .Content = "OK",
-            .HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-            .Margin = New Thickness(0, 20, 0, 0)
+            .HorizontalAlignment = HorizontalAlignment.Center,
+            .Padding = New Thickness(24, 8)
         }
-
         AddHandler okButton.Click, Sub(s, e) dialog.Close()
+        Grid.SetRow(okButton, 1)
 
-        stackPanel.Children.Add(textBlock)
-        stackPanel.Children.Add(okButton)
+        grid.Children.Add(scrollViewer)
+        grid.Children.Add(okButton)
 
-        dialog.Content = stackPanel
+        dialog.Content = grid
+
         dialog.ShowDialog(Me)
     End Sub
 
