@@ -89,7 +89,8 @@ Partial Class MainWindow
 
         EnvironmentPreviewTextBox.Text = $"ANTHROPIC_API_KEY={apiKey}
 ANTHROPIC_BASE_URL={baseUrl}
-ANTHROPIC_MODEL={model}"
+ANTHROPIC_MODEL={model}
+DISABLE_TELEMETRY=1"
     End Sub
 
     Private Sub LaunchButton_Click(sender As Object, e As RoutedEventArgs) Handles LaunchButton.Click
@@ -136,8 +137,8 @@ ANTHROPIC_MODEL={model}"
         }
 
         If OperatingSystem.IsLinux() Then
-            startInfo.FileName = "gnome-terminal"
-            startInfo.Arguments = "-- bash -c ""claude; exec bash"""
+            startInfo.FileName = "x-terminal-emulator"
+            startInfo.Arguments = "-e bash -c ""claude; exec bash"""
         ElseIf OperatingSystem.IsMacOS() Then
             startInfo.FileName = "open"
             startInfo.Arguments = "-a Terminal --args -l -c ""claude"""
