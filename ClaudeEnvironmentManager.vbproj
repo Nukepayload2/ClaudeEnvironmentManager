@@ -8,6 +8,7 @@
     <RootNamespace>ClaudeEnvironmentManager</RootNamespace>
     <OptionStrict>On</OptionStrict>
     <IsAotCompatible>true</IsAotCompatible>
+    <AssemblyName>ClaudeEnvMgr</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

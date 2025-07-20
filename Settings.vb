@@ -1,7 +1,7 @@
 Imports System.IO
 
 Public NotInheritable Class Settings
-    Private Const SettingsFileName As String = "ClaudeEnvironmentManager.config"
+    Private Const SettingsFileName As String = "ClaudeEnvMgr.config.xml"
     Private Const DefaultModels As String = "Pro/moonshotai/Kimi-K2-Instruct,moonshotai/Kimi-K2-Instruct,kimi-latest,kimi-k2-0711-preview"
 
     Public Property AnthropicApiKey As String

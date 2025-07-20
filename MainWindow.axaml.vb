@@ -37,31 +37,29 @@ Partial Class MainWindow
 
     Private Sub LoadEnvironmentVariables()
         ' Load API Keys
-        Dim apiKeys = Environment.GetEnvironmentVariables().
-            Cast(Of DictionaryEntry)().
-            Where(Function(kv) kv.Key.ToString().EndsWith("_API_KEY", StringComparison.OrdinalIgnoreCase) AndAlso
-                  Not kv.Key.ToString().Equals("ANTHROPIC_API_KEY", StringComparison.OrdinalIgnoreCase)).
+        Dim apiKeys = Environment.GetEnvironmentVariables.
+            Cast(Of DictionaryEntry).
+            Where(Function(kv) kv.Key.ToString.EndsWith("_API_KEY", StringComparison.OrdinalIgnoreCase)).
             ToList()
 
         For Each kv In apiKeys
-            Dim item = New ComboBoxItem() With {
-                .Content = kv.Key.ToString(),
-                .Tag = kv.Value.ToString()
+            Dim item = New ComboBoxItem With {
+                .Content = kv.Key.ToString,
+                .Tag = kv.Value.ToString
             }
             ApiKeyComboBox.Items.Add(item)
         Next
 
         ' Load Base URLs
         Dim baseUrls = Environment.GetEnvironmentVariables().
-            Cast(Of DictionaryEntry)().
-            Where(Function(kv) kv.Key.ToString().EndsWith("_BASE_URL", StringComparison.OrdinalIgnoreCase) AndAlso
-                  Not kv.Key.ToString().Equals("ANTHROPIC_BASE_URL", StringComparison.OrdinalIgnoreCase)).
+            Cast(Of DictionaryEntry).
+            Where(Function(kv) kv.Key.ToString.EndsWith("_BASE_URL", StringComparison.OrdinalIgnoreCase)).
             ToList()
 
         For Each kv In baseUrls
-            Dim item = New ComboBoxItem() With {
-                .Content = kv.Key.ToString(),
-                .Tag = kv.Value.ToString()
+            Dim item = New ComboBoxItem With {
+                .Content = kv.Key.ToString,
+                .Tag = kv.Value.ToString
             }
             BaseUrlComboBox.Items.Add(item)
         Next
@@ -157,24 +155,26 @@ DISABLE_TELEMETRY=1"
         _settings.AnthropicBaseUrl = BaseUrlTextBox.Text
         _settings.AnthropicModel = ModelTextBox.Text
         _settings.LastSelectedFolder = FolderPathTextBox.Text
-        _settings.ModelList = ModelComboBox.Items.OfType(Of String).Append(ModelTextBox.Text?.Trim).Where(Function(it) it <> Nothing).Distinct().ToList()
+        _settings.ModelList = ModelComboBox.Items.OfType(Of String).
+            Append(ModelTextBox.Text?.Trim).
+            Where(Function(it) it <> Nothing).Distinct.ToList()
         _settings.Save()
     End Sub
 
     Private Sub LaunchClaude()
-        Dim startInfo = New ProcessStartInfo() With {
+        Dim startInfo = New ProcessStartInfo With {
             .WorkingDirectory = FolderPathTextBox.Text,
             .UseShellExecute = False,
             .CreateNoWindow = False
         }
 
-        If OperatingSystem.IsLinux() Then
+        If OperatingSystem.IsLinux Then
             startInfo.FileName = "x-terminal-emulator"
             startInfo.Arguments = "-e bash -c ""claude; exec bash"""
-        ElseIf OperatingSystem.IsMacOS() Then
+        ElseIf OperatingSystem.IsMacOS Then
             startInfo.FileName = "open"
             startInfo.Arguments = "-a Terminal --args -l -c ""claude"""
-        ElseIf OperatingSystem.IsWindows() Then
+        ElseIf OperatingSystem.IsWindows Then
             startInfo.FileName = "cmd"
             startInfo.Arguments = "/k claude"
         Else
@@ -251,7 +251,7 @@ DISABLE_TELEMETRY=1"
     Private Sub ApiKeyTextBox_TextChanged(sender As Object, e As TextChangedEventArgs) Handles ApiKeyTextBox.TextChanged
         Dim text = ApiKeyTextBox.Text
         For Each it As ComboBoxItem In ApiKeyComboBox.Items
-            If it.Tag.ToString() = text Then
+            If it.Tag.ToString = text Then
                 ApiKeyComboBox.SelectedItem = it
                 Exit For
             End If
@@ -267,7 +267,7 @@ DISABLE_TELEMETRY=1"
     Private Sub BaseUrlTextBox_TextChanged(sender As Object, e As TextChangedEventArgs) Handles BaseUrlTextBox.TextChanged
         Dim text = BaseUrlTextBox.Text
         For Each it As ComboBoxItem In BaseUrlComboBox.Items
-            If it.Tag.ToString() = text Then
+            If it.Tag.ToString = text Then
                 BaseUrlComboBox.SelectedItem = it
                 Exit For
             End If
@@ -283,7 +283,7 @@ DISABLE_TELEMETRY=1"
     Private Sub ModelTextBox_TextChanged(sender As Object, e As TextChangedEventArgs) Handles ModelTextBox.TextChanged
         Dim text = ModelTextBox.Text
         For Each it In ModelComboBox.Items
-            If it.ToString() = text Then
+            If it.ToString = text Then
                 ModelComboBox.SelectedItem = it
                 Exit For
             End If

@@ -1,7 +1,9 @@
-# Claude Environment Manager
+# Claude Code Environment Manager
+
+[ÖÐÎÄ](README.zh-CN.md)
 
 ## Overview
-The Claude Environment Manager is a graphical user interface (GUI) application for configuring and launching Claude environments with specific settings.
+The Claude Code Environment Manager (ClaudeEnvMgr) is a graphical user interface (GUI) application for configuring and launching Claude environments with specific settings.
 
 ## Features
 - Manage API keys for different services
@@ -22,14 +24,11 @@ The Claude Environment Manager is a graphical user interface (GUI) application f
 6. **Launch**: Start the Claude environment with your configurations
 
 ## Runtime Environment
-- Requires .NET 8.0 or later
-- Windows, Linux, and macOS support
+- .NET 8.0 or later
+- Windows, Linux, and macOS
 
 ## Getting Started
 1. Clone the repository
 2. Build the solution with Visual Studio or .NET CLI (`dotnet build`)
 3. Run the application and configure your settings
 4. Launch a Claude environment
-
-## License
-This project is licensed under the terms of the LICENSE.txt file in this repository.
