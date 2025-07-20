@@ -1,6 +1,6 @@
 # Claude Code Environment Manager
 
-[ÖÐÎÄ](README.zh-CN.md)
+[ä¸­æ–‡](README.zh-CN.md)
 
 ## Overview
 The Claude Code Environment Manager (ClaudeEnvMgr) is a graphical user interface (GUI) application for configuring and launching Claude environments with specific settings.
