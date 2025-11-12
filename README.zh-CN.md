@@ -22,7 +22,7 @@ Claude Code »·¾³¹ÜÀíÆ÷ÊÇÒ»¸öÍ¼ÐÎÓÃ»§½çÃæ£¨GUI£©Ó¦ÓÃ³ÌÐò£¬ÓÃÓÚÅäÖÃºÍÆô¶¯´øÓÐÌØ¶¨É
 6. **Æô¶¯**£ºÊ¹ÓÃÄãµÄÅäÖÃÆô¶¯ Claude »·¾³
 
 ## ÔËÐÐ»·¾³
-- ÐèÒª .NET 8.0 »ò¸ü¸ß°æ±¾
+- ÐèÒª .NET 10.0 »ò¸ü¸ß°æ±¾
 - Ö§³Ö Windows¡¢Linux ºÍ macOS
 
 ## ¿ìËÙÈëÃÅ

@@ -24,7 +24,7 @@ The Claude Code Environment Manager (ClaudeEnvMgr) is a graphical user interface
 6. **Launch**: Start the Claude environment with your configurations
 
 ## Runtime Environment
-- .NET 8.0 or later
+- .NET 10.0 or later
 - Windows, Linux, and macOS
 
 ## Getting Started
